@@ -1,0 +1,5 @@
+node_modules/
+bots-hands.json
+.claude/
+.system_generated/
+.gemini/

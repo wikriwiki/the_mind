@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0a3d2e" />
+  <title>The Mind · 더 마인드</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- ===== 랜딩 ===== -->
+  <section id="screen-landing" class="screen is-active">
+    <div class="landing">
+      <div class="logo">
+        <div class="logo-mark">🧠</div>
+        <h1 class="logo-title">THE MIND</h1>
+        <p class="logo-sub">더 마인드</p>
+        <p class="logo-tag">말은 필요 없다. 마음으로 통하라.</p>
+      </div>
+      <div class="menu">
+        <button class="btn btn-gold" id="btn-go-create">방 만들기</button>
+        <button class="btn btn-outline" id="btn-go-join">방 참가하기</button>
+        <button class="btn btn-text" id="btn-go-rules">게임 방법</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 방 만들기 ===== -->
+  <section id="screen-create" class="screen">
+    <div class="panel">
+      <h2 class="panel-title">방 만들기</h2>
+      <label class="field">
+        <span>닉네임</span>
+        <input type="text" id="create-name" placeholder="이름을 입력하세요" maxlength="12" autocomplete="off" />
+      </label>
+      <div class="panel-actions">
+        <button class="btn btn-gold" id="btn-create-confirm">방 생성</button>
+        <button class="btn btn-text" data-back>뒤로</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 방 참가 ===== -->
+  <section id="screen-join" class="screen">
+    <div class="panel">
+      <h2 class="panel-title">방 참가하기</h2>
+      <label class="field">
+        <span>방 코드</span>
+        <input type="text" id="join-code" placeholder="4자리 코드" maxlength="4" autocomplete="off" class="code-input" />
+      </label>
+      <label class="field">
+        <span>닉네임</span>
+        <input type="text" id="join-name" placeholder="이름을 입력하세요" maxlength="12" autocomplete="off" />
+      </label>
+      <div class="panel-actions">
+        <button class="btn btn-gold" id="btn-join-confirm">참가</button>
+        <button class="btn btn-text" data-back>뒤로</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 대기실 ===== -->
+  <section id="screen-lobby" class="screen">
+    <div class="panel panel-wide">
+      <h2 class="panel-title">대기실</h2>
+      <div class="room-code">
+        <span class="room-code-label">방 코드</span>
+        <span class="room-code-value" id="lobby-code">----</span>
+        <button class="btn btn-mini" id="btn-copy-code">복사</button>
+      </div>
+      <div class="lobby-players" id="lobby-players"></div>
+      <p class="lobby-config" id="lobby-config"></p>
+      <p class="lobby-hint" id="lobby-hint">방장이 시작하기를 기다리는 중…</p>
+      <div class="panel-actions">
+        <button class="btn btn-gold" id="btn-start" hidden>게임 시작</button>
+        <button class="btn btn-text" id="btn-leave-lobby">나가기</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 게임 (포커 테이블) ===== -->
+  <section id="screen-game" class="screen">
+    <header class="hud">
+      <div class="hud-cell">
+        <span class="hud-label">레벨</span>
+        <span class="hud-val"><b id="hud-level">1</b><small id="hud-maxlevel">/12</small></span>
+      </div>
+      <div class="hud-cell hud-lives">
+        <span class="hud-label">목숨</span>
+        <div class="pips" id="hud-lives"></div>
+      </div>
+      <div class="hud-cell hud-shurikens">
+        <span class="hud-label">표창</span>
+        <div class="pips" id="hud-shurikens"></div>
+      </div>
+      <button class="btn btn-mini hud-sound" id="btn-sound" title="소리 켜기/끄기">🔊</button>
+      <button class="btn btn-mini hud-menu" id="btn-game-menu">메뉴</button>
+    </header>
+
+    <div class="table-wrap">
+      <div class="poker-table">
+        <div class="table-felt">
+          <div class="table-rail"></div>
+          <div class="seats" id="seats"></div>
+          <div class="table-center">
+            <div class="discard-pile" id="discard-pile">
+              <div class="pile-card" id="pile-card"><span id="pile-value">—</span></div>
+              <div class="pile-caption" id="pile-caption">아직 낸 카드가 없습니다</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="dock">
+      <div class="dock-controls">
+        <button class="btn btn-shuriken" id="btn-shuriken">
+          <span class="shuriken-icon">★</span>
+          <span class="shuriken-label">표창 투표</span>
+          <span class="shuriken-count" id="shuriken-count">0/0</span>
+        </button>
+        <button class="btn btn-emoji-toggle" id="btn-emoji-toggle" title="이모티콘 보내기">😀</button>
+      </div>
+      <div class="emoji-tray" id="emoji-tray" hidden></div>
+      <div class="my-hand">
+        <div class="hand-title">내 카드</div>
+        <div class="hand-cards" id="hand-cards"></div>
+      </div>
+    </footer>
+  </section>
+
+  <!-- ===== 토스트 ===== -->
+  <div id="toast" class="toast"></div>
+
+  <!-- ===== 이벤트 배너 ===== -->
+  <div id="banner" class="banner"></div>
+
+  <!-- ===== 모달 ===== -->
+  <div id="modal-overlay" class="modal-overlay">
+    <div class="modal" id="modal">
+      <div class="modal-icon" id="modal-icon"></div>
+      <h2 class="modal-title" id="modal-title"></h2>
+      <div class="modal-body" id="modal-body"></div>
+      <div class="modal-actions" id="modal-actions"></div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="audio.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
