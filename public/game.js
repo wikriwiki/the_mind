@@ -179,6 +179,28 @@ function renderLobby() {
     startBtn.hidden = true;
     $('lobby-hint').textContent = '방장이 시작하기를 기다리는 중…';
   }
+
+  // 시작 옵션 수치 연동
+  $('lobby-start-level-val').textContent = state.startLevel || 1;
+  $('lobby-max-card-val').textContent = state.maxCardVal || 100;
+
+  // 방장 권한 조작 가시성 제어
+  const levelDown = $('btn-level-down');
+  const levelUp = $('btn-level-up');
+  const cardDown = $('btn-card-down');
+  const cardUp = $('btn-card-up');
+
+  if (me?.isHost) {
+    levelDown.style.visibility = 'visible';
+    levelUp.style.visibility = 'visible';
+    cardDown.style.visibility = 'visible';
+    cardUp.style.visibility = 'visible';
+  } else {
+    levelDown.style.visibility = 'hidden';
+    levelUp.style.visibility = 'hidden';
+    cardDown.style.visibility = 'hidden';
+    cardUp.style.visibility = 'hidden';
+  }
 }
 
 function renderHud() {
@@ -532,6 +554,44 @@ $('btn-start').onclick = () => socket.emit('start-game');
 $('btn-leave-lobby').onclick = () => { socket.emit('leave-room'); show('landing'); };
 $('btn-shuriken').onclick = () => socket.emit('vote-shuriken');
 
+$('btn-level-down').onclick = () => {
+  if (!state || !state.roomId) return;
+  const current = state.startLevel || 1;
+  if (current > 1) {
+    socket.emit('set-start-level', { level: current - 1 });
+  }
+};
+
+$('btn-level-up').onclick = () => {
+  if (!state || !state.roomId) return;
+  const current = state.startLevel || 1;
+  const n = state.players.length;
+  const cfg = configFor(n);
+  if (current < cfg.maxLevels) {
+    socket.emit('set-start-level', { level: current + 1 });
+  } else {
+    toast(`이 인원수에서의 최대 레벨은 ${cfg.maxLevels}입니다.`, true);
+  }
+};
+
+const CARD_LIMITS = [100, 150, 200];
+
+$('btn-card-down').onclick = () => {
+  if (!state || !state.roomId) return;
+  const current = state.maxCardVal || 100;
+  let idx = CARD_LIMITS.indexOf(current);
+  idx = (idx - 1 + CARD_LIMITS.length) % CARD_LIMITS.length;
+  socket.emit('set-max-card', { maxCard: CARD_LIMITS[idx] });
+};
+
+$('btn-card-up').onclick = () => {
+  if (!state || !state.roomId) return;
+  const current = state.maxCardVal || 100;
+  let idx = CARD_LIMITS.indexOf(current);
+  idx = (idx + 1) % CARD_LIMITS.length;
+  socket.emit('set-max-card', { maxCard: CARD_LIMITS[idx] });
+};
+
 $('btn-game-menu').onclick = () => {
   openModal({
     kind: 'menu',
@@ -555,7 +615,7 @@ function showRules() {
       <div class="modal-rules">
         <p><b>The Mind</b>는 말 없이 마음을 모으는 협동 카드게임입니다.</p>
         <h3>목표</h3>
-        <p>1~100의 카드를 <b>오름차순</b>으로 모두 내면 레벨 클리어! 모든 레벨을 깨면 승리합니다.</p>
+        <p>1~${state ? state.maxCardVal : 100}의 카드를 <b>오름차순</b>으로 모두 내면 레벨 클리어! 모든 레벨을 깨면 승리합니다.</p>
         <h3>규칙</h3>
         <ul>
           <li>레벨 N에서는 각자 카드를 N장씩 받습니다.</li>

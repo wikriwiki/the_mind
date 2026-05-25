@@ -55,7 +55,8 @@ function findRoom(socketId) {
 }
 
 function dealCards(room) {
-  const deck = shuffle(Array.from({ length: 100 }, (_, i) => i + 1));
+  const limit = room.maxCardVal || 100;
+  const deck = shuffle(Array.from({ length: limit }, (_, i) => i + 1));
   let idx = 0;
   for (const p of room.players) {
     p.cards = deck.slice(idx, idx + room.level).sort((a, b) => a - b);
@@ -86,6 +87,8 @@ function publicState(room, forId) {
     pileCount: room.pile.length,
     lastPlayedBy: room.lastPlayedBy,
     culprit: room.culprit || null,
+    startLevel: room.startLevel || 1,
+    maxCardVal: room.maxCardVal || 100,
     myId: forId,
     myCards: me ? me.cards : [],
     players: room.players.map((p) => ({
@@ -168,6 +171,8 @@ io.on('connection', (socket) => {
       shurikenVotes: new Set(),
       readyVotes: new Set(),
       culprit: null,
+      startLevel: 1,
+      maxCardVal: 100,
     };
     rooms.set(roomId, room);
     socket.join(roomId);
@@ -206,7 +211,7 @@ io.on('connection', (socket) => {
     room.shurikens = cfg.shurikens;
     room.livesPeak = cfg.lives;
     room.shurikensPeak = cfg.shurikens;
-    room.level = 1;
+    room.level = room.startLevel || 1;
     dealCards(room);
     io.to(room.id).emit('notify', { type: 'game-start', message: '게임 시작! 집중하세요.' });
     broadcast(room);
@@ -354,7 +359,7 @@ io.on('connection', (socket) => {
     room.shurikens = cfg.shurikens;
     room.livesPeak = cfg.lives;
     room.shurikensPeak = cfg.shurikens;
-    room.level = 1;
+    room.level = room.startLevel || 1;
     dealCards(room);
     broadcast(room);
   });
@@ -380,6 +385,37 @@ io.on('connection', (socket) => {
     const me = room.players.find((p) => p.id === socket.id);
     if (!me) return;
     io.to(room.id).emit('emoji', { playerId: me.id, name: me.name, emoji });
+  });
+
+  socket.on('set-start-level', ({ level }) => {
+    const room = findRoom(socket.id);
+    if (!room || room.phase !== 'lobby') return;
+    const me = room.players.find((p) => p.id === socket.id);
+    if (!me?.isHost) return;
+
+    const cfg = config(room.players.length);
+    const maxLvl = cfg.maxLevels;
+    const target = Math.max(1, Math.min(maxLvl, parseInt(level, 10) || 1));
+    room.startLevel = target;
+    broadcast(room);
+  });
+
+  socket.on('set-max-card', ({ maxCard }) => {
+    const room = findRoom(socket.id);
+    if (!room || room.phase !== 'lobby') return;
+    const me = room.players.find((p) => p.id === socket.id);
+    if (!me?.isHost) return;
+
+    const allowed = [100, 150, 200];
+    const target = allowed.includes(maxCard) ? maxCard : 100;
+    room.maxCardVal = target;
+    
+    // 시작 레벨 유효성 검증 재시행 (시작 레벨 장수가 카드 범위보다 클 수 없음 방지)
+    const cfg = config(room.players.length);
+    const maxLvl = cfg.maxLevels;
+    if (room.startLevel > maxLvl) room.startLevel = 1;
+
+    broadcast(room);
   });
 
   socket.on('leave-room', () => handleLeave(socket.id));

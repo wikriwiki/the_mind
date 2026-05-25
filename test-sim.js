@@ -66,19 +66,30 @@ async function run() {
   await sleep(100);
 
   // --- 게임 시작 ---
-  console.log('\n[2] 게임 시작 & 1레벨 배분');
+  console.log('\n[2] 게임 시작 & 커스텀 시작 레벨/카드 범위 적용');
   // 비방장 시작 시도 → 거부
   B.sock.emit('start-game');
   await sleep(150);
   assert(B.errors.some((e) => e.includes('방장')), '비방장 시작 거부됨');
 
+  // 방장이 옵션 변경 (시작 레벨 3, 최대 카드 150)
+  A.sock.emit('set-start-level', { level: 3 });
+  A.sock.emit('set-max-card', { maxCard: 150 });
+  await sleep(250);
+  assert(A.state?.startLevel === 3, '시작 레벨 3 설정 동기화');
+  assert(A.state?.maxCardVal === 150, '최대 카드 범위 150 설정 동기화');
+
   A.sock.emit('start-game');
   await sleep(300);
   const clients = [A, B, C];
   assert(A.state?.phase === 'playing', '게임 playing 진입');
-  assert(A.state?.level === 1, '레벨 1 시작');
+  assert(A.state?.level === 3, '레벨 3 시작 성공');
   assert(A.state?.lives === 3, '3인 시작 목숨 3');
-  assert(totalCards(clients) === 3, '1레벨: 총 3장 (각 1장)');
+  assert(totalCards(clients) === 9, '3레벨 시작: 총 9장 분배 (각 3장씩)');
+
+  // 분배된 카드가 가변 카드 범위 [1, 150] 내에 존재하는지 단언
+  const allInRange = clients.every((c) => (c.state?.myCards || []).every((card) => card >= 1 && card <= 150));
+  assert(allInRange, '모든 분배 카드가 설정된 가변 범위 [1 ~ 150] 내에 존재함');
 
   // --- 완벽 플레이로 레벨 진행 ---
   console.log('\n[3] 완벽 플레이로 여러 레벨 클리어');
