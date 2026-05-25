@@ -5,6 +5,9 @@
 
 본 프로젝트는 미학적인 포커 Felt 스타일 테이블 디자인, 실시간 소켓 통신, 그리고 외부 리소스 다운로드 없이 브라우저 단에서 즉석 신디사이징 연주를 펼치는 **자립형 Web Audio 사운드 엔진**이 탑재된 프리미엄 웹앱입니다.
 
+[![Deploy to Render](https://render.com/images/deploy-to-render.svg)](https://render.com/deploy?repo=https://github.com/wikriwiki/the_mind)
+
+
 ---
 
 ## ✨ 주요 특징 (Key Features)
@@ -49,12 +52,19 @@
 
 ## 🚀 시작하기 (Quick Start)
 
-### 방법 A: 친구들과 온라인으로 바로 즐기기 (추천 - 윈도우 한정)
+### 방법 A: Render.com 1-Click 고정 서버 배포 (강력 추천! 24시간 평생 고정 주소)
+1. 아래의 **[Deploy to Render]** 버튼을 클릭합니다.
+2. Render.com 회원가입/로그인 완료 시 빌드 및 배포 절차가 완전 자동으로 전개됩니다.
+3. 배포 성공 후 생성되는 고정 주소(예: `https://the-mind-xxxx.onrender.com`)를 친구들에게 공유하여 24시간 언제든 똑같은 주소로 플레이하세요!
+
+[![Deploy to Render](https://render.com/images/deploy-to-render.svg)](https://render.com/deploy?repo=https://github.com/wikriwiki/the_mind)
+
+### 방법 B: 친구들과 온라인으로 바로 즐기기 (로컬 기기 호스팅 - 윈도우 한정)
 1. 프로젝트 폴더 루트에 있는 **`host.bat`** 파일을 더블클릭하여 실행합니다.
 2. 의존성과 터널 런타임이 자동으로 준비된 뒤 터널 주소가 터미널에 공지됩니다.
 3. 자동으로 클립보드에 복사된 주소를 친구들에게 보내주고, 자동 기동된 웹 브라우저에서 바로 마인드 플레이를 즐기세요!
 
-### 방법 B: 개발자 로컬 모드로 구동하기
+### 방법 C: 개발자 로컬 모드로 구동하기
 1. 필요한 패키지를 설치합니다.
    ```bash
    npm install

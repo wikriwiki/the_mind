@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: the-mind-game
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node server.js
