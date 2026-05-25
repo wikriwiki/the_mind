@@ -201,6 +201,20 @@ function renderLobby() {
     cardDown.style.visibility = 'hidden';
     cardUp.style.visibility = 'hidden';
   }
+
+  // 하드코어 모드 렌더링
+  const hcBtn = $('btn-hardcore-toggle');
+  const isHC = state.hardcore || false;
+  hcBtn.textContent = isHC ? '🔥 ON' : 'OFF';
+  hcBtn.style.background = isHC ? 'var(--danger)' : '';
+  hcBtn.style.color = isHC ? '#fff' : '';
+  if (me?.isHost) {
+    hcBtn.style.visibility = 'visible';
+    hcBtn.disabled = false;
+  } else {
+    hcBtn.style.visibility = 'visible';
+    hcBtn.disabled = true;
+  }
 }
 
 function renderHud() {
@@ -451,7 +465,12 @@ socket.on('notify', (d) => {
     case 'mistake': {
       pendingPileFx = 'shake';
       const minCard = Math.min(...d.lowerCards.map((l) => l.card));
-      banner(`💥 실수! (최저 카드: ${minCard})`, 'danger');
+      const dmg = d.damage || 1;
+      if (dmg > 1) {
+        banner(`💀 실수! ${dmg}장 배제 → 목숨 -${dmg}! (최저: ${minCard})`, 'danger');
+      } else {
+        banner(`💥 실수! (최저 카드: ${minCard})`, 'danger');
+      }
       Sound.mistake();
       toast(`💔 더 낮은 카드: ${d.lowerCards.map((l) => l.card).join(', ')}`, true, 3200);
       break;
@@ -592,6 +611,11 @@ $('btn-card-up').onclick = () => {
   socket.emit('set-max-card', { maxCard: CARD_LIMITS[idx] });
 };
 
+$('btn-hardcore-toggle').onclick = () => {
+  if (!state || !state.roomId) return;
+  socket.emit('set-hardcore', { enabled: !state.hardcore });
+};
+
 $('btn-game-menu').onclick = () => {
   openModal({
     kind: 'menu',
@@ -646,7 +670,13 @@ EMOJIS.forEach((e) => {
   };
   emojiTray.appendChild(b);
 });
-$('btn-emoji-toggle').onclick = () => { emojiTray.hidden = !emojiTray.hidden; };
+$('btn-emoji-toggle').onclick = () => {
+  if (emojiTray.hasAttribute('hidden')) {
+    emojiTray.removeAttribute('hidden');
+  } else {
+    emojiTray.setAttribute('hidden', '');
+  }
+};
 
 $('btn-sound').onclick = () => {
   Sound.unlock();

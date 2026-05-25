@@ -89,6 +89,7 @@ function publicState(room, forId) {
     culprit: room.culprit || null,
     startLevel: room.startLevel || 1,
     maxCardVal: room.maxCardVal || 100,
+    hardcore: room.hardcore || false,
     myId: forId,
     myCards: me ? me.cards : [],
     players: room.players.map((p) => ({
@@ -173,6 +174,7 @@ io.on('connection', (socket) => {
       culprit: null,
       startLevel: 1,
       maxCardVal: 100,
+      hardcore: false,
     };
     rooms.set(roomId, room);
     socket.join(roomId);
@@ -238,18 +240,22 @@ io.on('connection', (socket) => {
     }
 
     if (lower.length > 0) {
-      room.lives -= 1;
+      const damage = room.hardcore ? lower.length : 1;
+      room.lives -= damage;
       // 낸 카드보다 작은 카드는 전원 버림
       for (const p of room.players) p.cards = p.cards.filter((c) => c >= card);
       lower.sort((a, b) => a.card - b.card);
 
       io.to(room.id).emit('notify', {
         type: 'mistake',
-        message: `💔 ${me.name} 님이 ${card}를 냈지만 더 낮은 카드가 있었습니다!`,
+        message: room.hardcore
+          ? `💀 ${me.name} 님이 ${card}를 냈지만 더 낮은 카드 ${lower.length}장! 목숨 -${damage}!`
+          : `💔 ${me.name} 님이 ${card}를 냈지만 더 낮은 카드가 있었습니다!`,
         playedCard: card,
         playedBy: me.name,
         lowerCards: lower,
         livesLeft: room.lives,
+        damage,
       });
 
       if (room.lives <= 0) {
@@ -415,6 +421,15 @@ io.on('connection', (socket) => {
     const maxLvl = cfg.maxLevels;
     if (room.startLevel > maxLvl) room.startLevel = 1;
 
+    broadcast(room);
+  });
+
+  socket.on('set-hardcore', ({ enabled }) => {
+    const room = findRoom(socket.id);
+    if (!room || room.phase !== 'lobby') return;
+    const me = room.players.find((p) => p.id === socket.id);
+    if (!me?.isHost) return;
+    room.hardcore = !!enabled;
     broadcast(room);
   });
 
