@@ -573,7 +573,7 @@ function showRules() {
 }
 
 /* ===================== 사운드 & 이모티콘 ===================== */
-const EMOJIS = ['👍', '😂', '😮', '😱', '🔥', '🎉', '🤔', '😎'];
+const EMOJIS = ['👍', '😂', '😮', '😱', '🔥', '🎉', '🤔', '😎', '🤏', '🤚', '🖕', '🍌', '😐'];
 const emojiTray = $('emoji-tray');
 EMOJIS.forEach((e) => {
   const b = document.createElement('button');

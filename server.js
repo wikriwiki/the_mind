@@ -22,7 +22,7 @@ const GAME_CONFIG = {
 };
 const MAX_LIVES = 6;
 const MAX_SHURIKENS = 4;
-const ALLOWED_EMOJIS = ['👍', '😂', '😮', '😱', '🔥', '🎉', '🤔', '😎'];
+const ALLOWED_EMOJIS = ['👍', '😂', '😮', '😱', '🔥', '🎉', '🤔', '😎', '🤏', '🤚', '🖕', '🍌', '😐'];
 
 function config(n) {
   return GAME_CONFIG[n] || GAME_CONFIG[6];
